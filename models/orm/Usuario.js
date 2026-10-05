@@ -18,6 +18,11 @@ const Usuario = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "usuarios",

@@ -9,16 +9,18 @@ const Pedido = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    cliente_id: {
+    usuario_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
     monto: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      validate: { min: 0.01, max: 99999999.99 },
     },
     fecha: {
       type: DataTypes.DATE,
+      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
   },

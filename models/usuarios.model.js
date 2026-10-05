@@ -1,8 +1,13 @@
 const pool = require("../config/db.js");
 
-const obtenerTodos = async () => {
-  const query = "SELECT id, nombre, email, created_at FROM usuarios;";
-  const result = await pool.query(query);
+const obtenerTodos = async ({ nombre, pagina = 1, limite = 100 } = {}) => {
+  const query = `SELECT id, nombre, email, created_at FROM usuarios
+    WHERE ($1::text IS NULL OR nombre ILIKE $1) ORDER BY id LIMIT $2 OFFSET $3;`;
+  const result = await pool.query(query, [
+    nombre ? `%${nombre}%` : null,
+    limite,
+    (pagina - 1) * limite,
+  ]);
   return result.rows;
 };
 
@@ -51,6 +56,7 @@ const crearConPerfil = async (nombre, email, biografia) => {
     ]);
 
     await client.query("COMMIT"); // Confirmación de la transacción
+    console.log("✅ COMMIT: usuario y perfil creados correctamente.");
 
     return {
       usuario: nuevoUsuario,
@@ -58,6 +64,9 @@ const crearConPerfil = async (nombre, email, biografia) => {
     };
   } catch (error) {
     await client.query("ROLLBACK"); // Cancelación ante cualquier falla
+    console.error(
+      `❌ ROLLBACK: creación de usuario y perfil cancelada (${error.code || "error"}).`,
+    );
     throw error;
   } finally {
     client.release(); // Liberación obligatoria del cliente al pool

@@ -1,48 +1,35 @@
-const { Usuario, Pedido } = require("../models/orm/index.js");
-
-// Consulta utilizando ORM sin relaciones
+const { Op } = require("sequelize");
+const { Usuario, Pedido, Perfil } = require("../models/orm/index.js");
+const { filtros } = require("../utils/validation.js");
+function opciones(query) {
+  const { nombre, pagina, limite } = filtros(query);
+  return {
+    where: nombre ? { nombre: { [Op.iLike]: `%${nombre}%` } } : {},
+    order: [["id", "ASC"]],
+    limit: limite,
+    offset: (pagina - 1) * limite,
+  };
+}
 const obtenerUsuariosORM = async (req, res) => {
-  try {
-    const usuarios = await Usuario.findAll();
-    return res.status(200).json({
-      status: "success",
-      message: "Usuarios obtenidos con Sequelize ORM",
-      data: usuarios,
-    });
-  } catch (error) {
-    console.error(`Error ORM: ${error.message}`);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Error en consulta ORM" });
-  }
+  const data = await Usuario.findAll(opciones(req.query));
+  res.json({
+    status: "success",
+    message: "Usuarios obtenidos con Sequelize ORM.",
+    data,
+  });
 };
-
-// Consulta utilizando ORM con Relaciones (include)
 const obtenerUsuariosConPedidos = async (req, res) => {
-  try {
-    const usuariosConPedidos = await Usuario.findAll({
-      include: [
-        {
-          model: Pedido,
-          as: "pedidos",
-        },
-      ],
-    });
-
-    return res.status(200).json({
-      status: "success",
-      message: "Usuarios y sus pedidos asociados (Relación 1:N)",
-      data: usuariosConPedidos,
-    });
-  } catch (error) {
-    console.error(`Error ORM Relaciones: ${error.message}`);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Error al consultar relaciones" });
-  }
+  const data = await Usuario.findAll({
+    ...opciones(req.query),
+    include: [
+      { model: Pedido, as: "pedidos" },
+      { model: Perfil, as: "perfil" },
+    ],
+  });
+  res.json({
+    status: "success",
+    message: "Usuarios con pedidos (1:N) y perfil (1:1).",
+    data,
+  });
 };
-
-module.exports = {
-  obtenerUsuariosORM,
-  obtenerUsuariosConPedidos,
-};
+module.exports = { obtenerUsuariosORM, obtenerUsuariosConPedidos };

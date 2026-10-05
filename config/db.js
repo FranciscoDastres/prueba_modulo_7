@@ -1,16 +1,15 @@
 const { Pool } = require("pg");
-require("dotenv").config();
+const { connection, schema } = require("./environment.js");
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  ...connection,
+  options: `-c search_path=${schema}`,
+  connectionTimeoutMillis: 5000,
+  statement_timeout: 5000,
 });
 
 pool.on("connect", () => {
-  console.log("✅ Conexión exitosa a PostgreSQL");
+  console.log(`✅ Conexión exitosa a PostgreSQL (esquema ${schema})`);
 });
 
 pool.on("error", (err) => {

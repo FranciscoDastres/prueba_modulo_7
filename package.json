@@ -1,26 +1,32 @@
 {
   "name": "modulo_7",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "ABP Módulo 7: PostgreSQL, CRUD, transacciones y relaciones con Sequelize",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:init": "node scripts/init-db.js",
+    "test": "node --test tests/modulo7.test.js",
+    "verify": "node scripts/verify.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
     "pg": "^8.23.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+  "engines": {
+    "node": ">=18.20"
+  },
+  "overrides": {
+    "sequelize": {
+      "uuid": "^11.1.1"
+    }
   }
 }
