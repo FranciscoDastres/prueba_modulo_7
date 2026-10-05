@@ -1,6 +1,6 @@
 # Entrega Parte 2 - Módulo 7
 
-Pauta: `abp/💼Proyecto Módulo #7 - ABP.pdf`, páginas impresas 11 a 15.
+Pauta de referencia: Proyecto Módulo 7 - ABP, páginas impresas 11 a 15. La carpeta `abp/` se conserva localmente y está excluida del repositorio y del paquete de entrega.
 
 ## Verificación técnica
 
@@ -26,7 +26,7 @@ Pauta: `abp/💼Proyecto Módulo #7 - ABP.pdf`, páginas impresas 11 a 15.
 - [x] Informe HTML y JSON con verificaciones y respuestas HTTP reales.
 - [x] Log de prueba con COMMIT y ROLLBACK.
 - [x] Capturas de lectura, escritura, eliminación, relaciones y rollback.
-- [x] Paquete ZIP sin credenciales ni `node_modules`.
+- [x] Paquete ZIP sin credenciales, `node_modules` ni material de `abp/`.
 
 ## Publicación de la entrega
 

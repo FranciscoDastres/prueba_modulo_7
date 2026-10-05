@@ -1,6 +1,9 @@
 # Dependencias
 node_modules/
 
+# Material de la consigna, conservado solo de forma local
+/abp/
+
 # Entorno y variables secretas
 .env
 .env.local

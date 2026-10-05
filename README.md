@@ -1,6 +1,6 @@
 # ABP Módulo 7: acceso a datos en aplicaciones Node
 
-Entrega de la **Parte 2**, según las lecciones 1 a 6 del PDF de `abp/` (páginas impresas 11 a 15). El proyecto usa Node.js, Express, PostgreSQL, `pg` y Sequelize para consultar y modificar datos, ejecutar transacciones y relacionar modelos.
+Entrega de la **Parte 2**, según las lecciones 1 a 6 de la consigna del módulo 7. El proyecto usa Node.js, Express, PostgreSQL, `pg` y Sequelize para consultar y modificar datos, ejecutar transacciones y relacionar modelos.
 
 ## Requisitos e instalación
 
