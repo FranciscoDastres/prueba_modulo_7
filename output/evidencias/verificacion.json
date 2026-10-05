@@ -1,0 +1,1119 @@
+{
+  "fecha": "2026-10-05T04:34:26.470Z",
+  "esquema": "abp7_test_24127_1791174866307",
+  "pruebas": [
+    {
+      "nombre": "L1: conexión y tablas usuarios, perfiles y pedidos",
+      "cumple": true
+    },
+    {
+      "nombre": "L1/L2: tres usuarios simulados y seed repetible",
+      "cumple": true
+    },
+    {
+      "nombre": "L2: GET /usuarios sin credenciales ni datos de autenticación",
+      "cumple": true
+    },
+    {
+      "nombre": "L2 PLUS: filtro por nombre y paginación",
+      "cumple": true
+    },
+    {
+      "nombre": "L2: búsquedas parametrizadas ante caracteres SQL",
+      "cumple": true
+    },
+    {
+      "nombre": "L4: POST /usuarios confirma usuario y perfil juntos",
+      "cumple": true
+    },
+    {
+      "nombre": "L2: consulta de usuario por ID",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: PUT actualiza y persiste nombre/email",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: email duplicado devuelve 409 y conserva los datos",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: rechaza ID inválido abc",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: rechaza ID inválido 1.5",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: rechaza ID inválido 0",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: rechaza ID inválido -1",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: rechaza ID inválido 2147483648",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: IDs inexistentes devuelven 404",
+      "cumple": true
+    },
+    {
+      "nombre": "Validaciones: campos ausentes",
+      "cumple": true
+    },
+    {
+      "nombre": "Validaciones: nombre vacío",
+      "cumple": true
+    },
+    {
+      "nombre": "Validaciones: email inválido",
+      "cumple": true
+    },
+    {
+      "nombre": "Validaciones: biografía inválida",
+      "cumple": true
+    },
+    {
+      "nombre": "Validaciones: JSON mal formado y paginación inválida",
+      "cumple": true
+    },
+    {
+      "nombre": "L4: error en la segunda inserción revierte también el usuario",
+      "cumple": true
+    },
+    {
+      "nombre": "L5: SQL manual y ORM producen resultados idénticos",
+      "cumple": true
+    },
+    {
+      "nombre": "L6: include devuelve pedidos 1:N y perfil 1:1",
+      "cumple": true
+    },
+    {
+      "nombre": "L6: clave foránea de pedidos referencia usuarios e incluye índice",
+      "cumple": true
+    },
+    {
+      "nombre": "CRUD pedidos: crear y consultar",
+      "cumple": true
+    },
+    {
+      "nombre": "CRUD pedidos: actualizar y eliminar",
+      "cumple": true
+    },
+    {
+      "nombre": "Pedidos: monto y usuario asociado válidos",
+      "cumple": true
+    },
+    {
+      "nombre": "L3: DELETE elimina usuario y relaciones en cascada",
+      "cumple": true
+    },
+    {
+      "nombre": "L2: errores reales de consulta devuelven 500 controlado",
+      "cumple": true
+    },
+    {
+      "nombre": "Módulo 8 excluido: login, registro, subida y uploads devuelven 404",
+      "cumple": true
+    }
+  ],
+  "operaciones": [
+    {
+      "metodo": "GET",
+      "ruta": "/health",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Servidor y PostgreSQL disponibles.",
+        "data": {
+          "database": "ok"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 2,
+            "nombre": "Bruno Soto",
+            "email": "bruno@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 3,
+            "nombre": "Carla Díaz",
+            "email": "carla@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios?nombre=ana",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios?pagina=1&limite=1",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios?pagina=2&limite=1",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": [
+          {
+            "id": 2,
+            "nombre": "Bruno Soto",
+            "email": "bruno@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios?nombre='%20OR%201%3D1%20--",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": []
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 201,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario y perfil creados en una sola transacción.",
+        "data": {
+          "usuario": {
+            "id": 7,
+            "nombre": "Diego Prueba",
+            "email": "diego@prueba.cl"
+          },
+          "perfil": {
+            "id": 7,
+            "biografia": "Perfil de prueba transaccional."
+          }
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios/7",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario obtenido correctamente.",
+        "data": {
+          "id": 7,
+          "nombre": "Diego Prueba",
+          "email": "diego@prueba.cl",
+          "created_at": "2026-10-05T04:34:26.627Z"
+        }
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/7",
+      "solicitud": {
+        "nombre": "Diego Actualizado",
+        "email": "DIEGO@PRUEBA.CL"
+      },
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario actualizado correctamente.",
+        "data": {
+          "id": 7,
+          "nombre": "Diego Actualizado",
+          "email": "diego@prueba.cl",
+          "created_at": "2026-10-05T04:34:26.627Z"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios/7",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario obtenido correctamente.",
+        "data": {
+          "id": 7,
+          "nombre": "Diego Actualizado",
+          "email": "diego@prueba.cl",
+          "created_at": "2026-10-05T04:34:26.627Z"
+        }
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/7",
+      "solicitud": {
+        "nombre": "No debe persistir",
+        "email": "ana@ejemplo.cl"
+      },
+      "codigo": 409,
+      "respuesta": {
+        "status": "error",
+        "message": "El email ya está registrado.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios/7",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario obtenido correctamente.",
+        "data": {
+          "id": 7,
+          "nombre": "Diego Actualizado",
+          "email": "diego@prueba.cl",
+          "created_at": "2026-10-05T04:34:26.627Z"
+        }
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "ana@ejemplo.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 409,
+      "respuesta": {
+        "status": "error",
+        "message": "El email ya está registrado.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/abc",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/abc",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/1.5",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/1.5",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/0",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/0",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/-1",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/-1",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/2147483648",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/2147483648",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "ID debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios/2147483647",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El usuario no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/usuarios/2147483647",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El usuario no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/2147483647",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El usuario no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {},
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "nombre es obligatorio y admite hasta 100 caracteres.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "   ",
+        "email": "diego@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "nombre es obligatorio y admite hasta 100 caracteres.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "incorrecto",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "El email debe tener un formato válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "diego@prueba.cl",
+        "biografia": []
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "biografia es obligatorio y admite hasta 1000 caracteres.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": "{",
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "El cuerpo debe contener JSON válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "resumen": "Solicitud mayor a 20 KB",
+        "longitudNombre": 21000
+      },
+      "codigo": 413,
+      "respuesta": {
+        "status": "error",
+        "message": "El cuerpo de la solicitud supera el límite de 20 KB.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios?limite=101",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "limite debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/orm/usuarios?pagina=0",
+      "solicitud": null,
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "pagina debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "solicitud": {
+        "nombre": "Diego Prueba",
+        "email": "rollback@prueba.cl",
+        "biografia": "Perfil de prueba transaccional."
+      },
+      "codigo": 500,
+      "respuesta": {
+        "status": "error",
+        "message": "Error interno del servidor.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos correctamente.",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 2,
+            "nombre": "Bruno Soto",
+            "email": "bruno@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 3,
+            "nombre": "Carla Díaz",
+            "email": "carla@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 7,
+            "nombre": "Diego Actualizado",
+            "email": "diego@prueba.cl",
+            "created_at": "2026-10-05T04:34:26.627Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/orm/usuarios",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios obtenidos con Sequelize ORM.",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 2,
+            "nombre": "Bruno Soto",
+            "email": "bruno@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 3,
+            "nombre": "Carla Díaz",
+            "email": "carla@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z"
+          },
+          {
+            "id": 7,
+            "nombre": "Diego Actualizado",
+            "email": "diego@prueba.cl",
+            "created_at": "2026-10-05T04:34:26.627Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/orm/usuarios-pedidos",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuarios con pedidos (1:N) y perfil (1:1).",
+        "data": [
+          {
+            "id": 1,
+            "nombre": "Ana Pérez",
+            "email": "ana@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z",
+            "pedidos": [
+              {
+                "id": 1,
+                "usuario_id": 1,
+                "monto": "25000.00",
+                "fecha": "2026-10-05T04:34:26.526Z"
+              },
+              {
+                "id": 2,
+                "usuario_id": 1,
+                "monto": "15000.00",
+                "fecha": "2026-10-05T04:34:26.526Z"
+              }
+            ],
+            "perfil": {
+              "id": 1,
+              "usuario_id": 1,
+              "biografia": "Perfil de demostración de Ana Pérez"
+            }
+          },
+          {
+            "id": 2,
+            "nombre": "Bruno Soto",
+            "email": "bruno@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z",
+            "pedidos": [
+              {
+                "id": 3,
+                "usuario_id": 2,
+                "monto": "32000.00",
+                "fecha": "2026-10-05T04:34:26.526Z"
+              }
+            ],
+            "perfil": {
+              "id": 2,
+              "usuario_id": 2,
+              "biografia": "Perfil de demostración de Bruno Soto"
+            }
+          },
+          {
+            "id": 3,
+            "nombre": "Carla Díaz",
+            "email": "carla@ejemplo.cl",
+            "created_at": "2026-10-05T04:34:26.526Z",
+            "pedidos": [],
+            "perfil": {
+              "id": 3,
+              "usuario_id": 3,
+              "biografia": "Perfil de demostración de Carla Díaz"
+            }
+          },
+          {
+            "id": 7,
+            "nombre": "Diego Actualizado",
+            "email": "diego@prueba.cl",
+            "created_at": "2026-10-05T04:34:26.627Z",
+            "pedidos": [],
+            "perfil": {
+              "id": 7,
+              "usuario_id": 7,
+              "biografia": "Perfil de prueba transaccional."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": "4500.50"
+      },
+      "codigo": 201,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido creado correctamente.",
+        "data": {
+          "fecha": "2026-10-05T04:34:26.738Z",
+          "id": 4,
+          "usuario_id": 7,
+          "monto": "4500.50"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/pedidos/4",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido obtenido correctamente.",
+        "data": {
+          "id": 4,
+          "usuario_id": 7,
+          "monto": "4500.50",
+          "fecha": "2026-10-05T04:34:26.738Z"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/pedidos?usuario_id=7",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedidos obtenidos correctamente.",
+        "data": [
+          {
+            "id": 4,
+            "usuario_id": 7,
+            "monto": "4500.50",
+            "fecha": "2026-10-05T04:34:26.738Z"
+          }
+        ]
+      }
+    },
+    {
+      "metodo": "PUT",
+      "ruta": "/pedidos/4",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": 9999
+      },
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido actualizado correctamente.",
+        "data": {
+          "id": 4,
+          "usuario_id": 7,
+          "monto": "9999",
+          "fecha": "2026-10-05T04:34:26.738Z"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/pedidos/4",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido obtenido correctamente.",
+        "data": {
+          "id": 4,
+          "usuario_id": 7,
+          "monto": "9999.00",
+          "fecha": "2026-10-05T04:34:26.738Z"
+        }
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/pedidos/4",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido eliminado correctamente.",
+        "data": {
+          "id": 4,
+          "usuario_id": 7,
+          "monto": "9999.00",
+          "fecha": "2026-10-05T04:34:26.738Z"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/pedidos/4",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El pedido no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": -1
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": 0
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": "1.234"
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": null
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": [
+          7
+        ],
+        "monto": 100
+      },
+      "codigo": 400,
+      "respuesta": {
+        "status": "error",
+        "message": "usuario_id debe ser un entero positivo válido.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 2147483647,
+        "monto": 100
+      },
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El usuario asociado no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/pedidos/2147483647",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El pedido no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/pedidos",
+      "solicitud": {
+        "usuario_id": 7,
+        "monto": 100
+      },
+      "codigo": 201,
+      "respuesta": {
+        "status": "success",
+        "message": "Pedido creado correctamente.",
+        "data": {
+          "fecha": "2026-10-05T04:34:26.785Z",
+          "id": 5,
+          "usuario_id": 7,
+          "monto": "100.00"
+        }
+      }
+    },
+    {
+      "metodo": "DELETE",
+      "ruta": "/usuarios/7",
+      "solicitud": null,
+      "codigo": 200,
+      "respuesta": {
+        "status": "success",
+        "message": "Usuario y registros asociados eliminados correctamente.",
+        "data": {
+          "id": 7,
+          "nombre": "Diego Actualizado",
+          "email": "diego@prueba.cl"
+        }
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios/7",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "El usuario no existe.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/usuarios",
+      "solicitud": null,
+      "codigo": 500,
+      "respuesta": {
+        "status": "error",
+        "message": "Error interno del servidor.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/auth/login",
+      "solicitud": {},
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "Ruta no encontrada.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/auth/registro",
+      "solicitud": {},
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "Ruta no encontrada.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/auth/subir-imagen",
+      "solicitud": {},
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "Ruta no encontrada.",
+        "data": null
+      }
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/uploads/prueba.png",
+      "solicitud": null,
+      "codigo": 404,
+      "respuesta": {
+        "status": "error",
+        "message": "Ruta no encontrada.",
+        "data": null
+      }
+    }
+  ],
+  "rollback": {
+    "errorHTTP": 500,
+    "usuariosPersistidos": 0,
+    "perfilesHuerfanos": 0
+  },
+  "comparacion": {
+    "usuariosSQL": 4,
+    "usuariosORM": 4,
+    "identicos": true
+  },
+  "total": 30,
+  "aprobadas": 30,
+  "esquemaPruebasEliminado": true
+}

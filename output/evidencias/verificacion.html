@@ -1,0 +1,567 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Evidencias ABP Módulo 7</title><style>body{font:16px/1.5 system-ui,sans-serif;background:#f4f6f8;color:#152238;margin:0}main{max-width:1050px;margin:32px auto;padding:0 24px}header,section,article{background:white;border:1px solid #d8dfe7;border-radius:8px;padding:24px;margin:20px 0}h1{margin:0 0 12px;font-size:30px}h2{font-size:24px}h3{font-size:19px;margin:0 0 16px}h4{margin:16px 0 8px}ul{list-style:none;padding:0}li{padding:9px 0;border-bottom:1px solid #e8ecf0}.check{color:#166534;font-weight:bold;margin-right:12px}.badge{display:inline-block;background:#dcfce7;color:#166534;padding:8px 16px;border-radius:6px;font-weight:bold}.code{float:right;color:#334155}pre{font:13px/1.5 ui-monospace,monospace;background:#f1f5f9;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere}p{margin:8px 0}.note{color:#475569}@media print{body{background:white}main{margin:0}article{break-inside:avoid}.code{float:none}}</style></head><body><main><header><h1>ABP · Módulo 7</h1><p>Acceso a datos en aplicaciones Node</p><p class="badge">30/30 verificaciones aprobadas</p><p>Fecha de ejecución: 2026-10-05T04:34:26.470Z</p><p class="note">Pruebas HTTP contra PostgreSQL real en un esquema temporal independiente, eliminado al finalizar.</p></header><section id="resumen"><h2>Checks de la entrega</h2><ul><li><span class="check">✓</span>L1: conexión y tablas usuarios, perfiles y pedidos</li><li><span class="check">✓</span>L1/L2: tres usuarios simulados y seed repetible</li><li><span class="check">✓</span>L2: GET /usuarios sin credenciales ni datos de autenticación</li><li><span class="check">✓</span>L2 PLUS: filtro por nombre y paginación</li><li><span class="check">✓</span>L2: búsquedas parametrizadas ante caracteres SQL</li><li><span class="check">✓</span>L4: POST /usuarios confirma usuario y perfil juntos</li><li><span class="check">✓</span>L2: consulta de usuario por ID</li><li><span class="check">✓</span>L3: PUT actualiza y persiste nombre/email</li><li><span class="check">✓</span>L3: email duplicado devuelve 409 y conserva los datos</li><li><span class="check">✓</span>L3: rechaza ID inválido abc</li><li><span class="check">✓</span>L3: rechaza ID inválido 1.5</li><li><span class="check">✓</span>L3: rechaza ID inválido 0</li><li><span class="check">✓</span>L3: rechaza ID inválido -1</li><li><span class="check">✓</span>L3: rechaza ID inválido 2147483648</li><li><span class="check">✓</span>L3: IDs inexistentes devuelven 404</li><li><span class="check">✓</span>Validaciones: campos ausentes</li><li><span class="check">✓</span>Validaciones: nombre vacío</li><li><span class="check">✓</span>Validaciones: email inválido</li><li><span class="check">✓</span>Validaciones: biografía inválida</li><li><span class="check">✓</span>Validaciones: JSON mal formado y paginación inválida</li><li><span class="check">✓</span>L4: error en la segunda inserción revierte también el usuario</li><li><span class="check">✓</span>L5: SQL manual y ORM producen resultados idénticos</li><li><span class="check">✓</span>L6: include devuelve pedidos 1:N y perfil 1:1</li><li><span class="check">✓</span>L6: clave foránea de pedidos referencia usuarios e incluye índice</li><li><span class="check">✓</span>CRUD pedidos: crear y consultar</li><li><span class="check">✓</span>CRUD pedidos: actualizar y eliminar</li><li><span class="check">✓</span>Pedidos: monto y usuario asociado válidos</li><li><span class="check">✓</span>L3: DELETE elimina usuario y relaciones en cascada</li><li><span class="check">✓</span>L2: errores reales de consulta devuelven 500 controlado</li><li><span class="check">✓</span>Módulo 8 excluido: login, registro, subida y uploads devuelven 404</li></ul></section><section id="rollback"><h2>Transaccionalidad comprobada</h2><p>Se forzó un error al insertar el perfil, después de insertar el usuario. El endpoint respondió HTTP 500 y PostgreSQL confirmó <strong>0 usuarios persistidos y 0 perfiles huérfanos</strong>.</p><pre>{
+  &quot;errorHTTP&quot;: 500,
+  &quot;usuariosPersistidos&quot;: 0,
+  &quot;perfilesHuerfanos&quot;: 0
+}</pre><h2>Comparación SQL / ORM</h2><pre>{
+  &quot;usuariosSQL&quot;: 4,
+  &quot;usuariosORM&quot;: 4,
+  &quot;identicos&quot;: true
+}</pre></section><h2>Peticiones y respuestas reales</h2><article id="operacion-1"><h3>GET /health <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Servidor y PostgreSQL disponibles.&quot;,
+  &quot;data&quot;: {
+    &quot;database&quot;: &quot;ok&quot;
+  }
+}</pre></article><article id="operacion-2"><h3>GET /usuarios <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;nombre&quot;: &quot;Bruno Soto&quot;,
+      &quot;email&quot;: &quot;bruno@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 3,
+      &quot;nombre&quot;: &quot;Carla Díaz&quot;,
+      &quot;email&quot;: &quot;carla@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-3"><h3>GET /usuarios?nombre=ana <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-4"><h3>GET /usuarios?pagina=1&amp;limite=1 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-5"><h3>GET /usuarios?pagina=2&amp;limite=1 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 2,
+      &quot;nombre&quot;: &quot;Bruno Soto&quot;,
+      &quot;email&quot;: &quot;bruno@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-6"><h3>GET /usuarios?nombre=&#39;%20OR%201%3D1%20-- <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: []
+}</pre></article><article id="operacion-7"><h3>POST /usuarios <span class="code">HTTP 201</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario y perfil creados en una sola transacción.&quot;,
+  &quot;data&quot;: {
+    &quot;usuario&quot;: {
+      &quot;id&quot;: 7,
+      &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+      &quot;email&quot;: &quot;diego@prueba.cl&quot;
+    },
+    &quot;perfil&quot;: {
+      &quot;id&quot;: 7,
+      &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+    }
+  }
+}</pre></article><article id="operacion-8"><h3>GET /usuarios/7 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario obtenido correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 7,
+    &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+    &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+    &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+  }
+}</pre></article><article id="operacion-9"><h3>PUT /usuarios/7 <span class="code">HTTP 200</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+  &quot;email&quot;: &quot;DIEGO@PRUEBA.CL&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario actualizado correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 7,
+    &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+    &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+    &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+  }
+}</pre></article><article id="operacion-10"><h3>GET /usuarios/7 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario obtenido correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 7,
+    &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+    &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+    &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+  }
+}</pre></article><article id="operacion-11"><h3>PUT /usuarios/7 <span class="code">HTTP 409</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;No debe persistir&quot;,
+  &quot;email&quot;: &quot;ana@ejemplo.cl&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El email ya está registrado.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-12"><h3>GET /usuarios/7 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario obtenido correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 7,
+    &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+    &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+    &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+  }
+}</pre></article><article id="operacion-13"><h3>POST /usuarios <span class="code">HTTP 409</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El email ya está registrado.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-14"><h3>PUT /usuarios/abc <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-15"><h3>DELETE /usuarios/abc <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-16"><h3>PUT /usuarios/1.5 <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-17"><h3>DELETE /usuarios/1.5 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-18"><h3>PUT /usuarios/0 <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-19"><h3>DELETE /usuarios/0 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-20"><h3>PUT /usuarios/-1 <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-21"><h3>DELETE /usuarios/-1 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-22"><h3>PUT /usuarios/2147483648 <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-23"><h3>DELETE /usuarios/2147483648 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;ID debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-24"><h3>GET /usuarios/2147483647 <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El usuario no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-25"><h3>PUT /usuarios/2147483647 <span class="code">HTTP 404</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El usuario no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-26"><h3>DELETE /usuarios/2147483647 <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El usuario no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-27"><h3>POST /usuarios <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;nombre es obligatorio y admite hasta 100 caracteres.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-28"><h3>POST /usuarios <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;   &quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;nombre es obligatorio y admite hasta 100 caracteres.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-29"><h3>POST /usuarios <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;incorrecto&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El email debe tener un formato válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-30"><h3>POST /usuarios <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+  &quot;biografia&quot;: []
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;biografia es obligatorio y admite hasta 1000 caracteres.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-31"><h3>POST /usuarios <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>&quot;{&quot;</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El cuerpo debe contener JSON válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-32"><h3>POST /usuarios <span class="code">HTTP 413</span></h3><h4>Solicitud</h4><pre>{
+  &quot;resumen&quot;: &quot;Solicitud mayor a 20 KB&quot;,
+  &quot;longitudNombre&quot;: 21000
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El cuerpo de la solicitud supera el límite de 20 KB.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-33"><h3>GET /usuarios?limite=101 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;limite debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-34"><h3>GET /orm/usuarios?pagina=0 <span class="code">HTTP 400</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;pagina debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-35"><h3>POST /usuarios <span class="code">HTTP 500</span></h3><h4>Solicitud</h4><pre>{
+  &quot;nombre&quot;: &quot;Diego Prueba&quot;,
+  &quot;email&quot;: &quot;rollback@prueba.cl&quot;,
+  &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Error interno del servidor.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-36"><h3>GET /usuarios <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;nombre&quot;: &quot;Bruno Soto&quot;,
+      &quot;email&quot;: &quot;bruno@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 3,
+      &quot;nombre&quot;: &quot;Carla Díaz&quot;,
+      &quot;email&quot;: &quot;carla@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 7,
+      &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+      &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-37"><h3>GET /orm/usuarios <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios obtenidos con Sequelize ORM.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;nombre&quot;: &quot;Bruno Soto&quot;,
+      &quot;email&quot;: &quot;bruno@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 3,
+      &quot;nombre&quot;: &quot;Carla Díaz&quot;,
+      &quot;email&quot;: &quot;carla@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+    },
+    {
+      &quot;id&quot;: 7,
+      &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+      &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-38"><h3>GET /orm/usuarios-pedidos <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuarios con pedidos (1:N) y perfil (1:1).&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;nombre&quot;: &quot;Ana Pérez&quot;,
+      &quot;email&quot;: &quot;ana@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;,
+      &quot;pedidos&quot;: [
+        {
+          &quot;id&quot;: 1,
+          &quot;usuario_id&quot;: 1,
+          &quot;monto&quot;: &quot;25000.00&quot;,
+          &quot;fecha&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+        },
+        {
+          &quot;id&quot;: 2,
+          &quot;usuario_id&quot;: 1,
+          &quot;monto&quot;: &quot;15000.00&quot;,
+          &quot;fecha&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+        }
+      ],
+      &quot;perfil&quot;: {
+        &quot;id&quot;: 1,
+        &quot;usuario_id&quot;: 1,
+        &quot;biografia&quot;: &quot;Perfil de demostración de Ana Pérez&quot;
+      }
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;nombre&quot;: &quot;Bruno Soto&quot;,
+      &quot;email&quot;: &quot;bruno@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;,
+      &quot;pedidos&quot;: [
+        {
+          &quot;id&quot;: 3,
+          &quot;usuario_id&quot;: 2,
+          &quot;monto&quot;: &quot;32000.00&quot;,
+          &quot;fecha&quot;: &quot;2026-10-05T04:34:26.526Z&quot;
+        }
+      ],
+      &quot;perfil&quot;: {
+        &quot;id&quot;: 2,
+        &quot;usuario_id&quot;: 2,
+        &quot;biografia&quot;: &quot;Perfil de demostración de Bruno Soto&quot;
+      }
+    },
+    {
+      &quot;id&quot;: 3,
+      &quot;nombre&quot;: &quot;Carla Díaz&quot;,
+      &quot;email&quot;: &quot;carla@ejemplo.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.526Z&quot;,
+      &quot;pedidos&quot;: [],
+      &quot;perfil&quot;: {
+        &quot;id&quot;: 3,
+        &quot;usuario_id&quot;: 3,
+        &quot;biografia&quot;: &quot;Perfil de demostración de Carla Díaz&quot;
+      }
+    },
+    {
+      &quot;id&quot;: 7,
+      &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+      &quot;email&quot;: &quot;diego@prueba.cl&quot;,
+      &quot;created_at&quot;: &quot;2026-10-05T04:34:26.627Z&quot;,
+      &quot;pedidos&quot;: [],
+      &quot;perfil&quot;: {
+        &quot;id&quot;: 7,
+        &quot;usuario_id&quot;: 7,
+        &quot;biografia&quot;: &quot;Perfil de prueba transaccional.&quot;
+      }
+    }
+  ]
+}</pre></article><article id="operacion-39"><h3>POST /pedidos <span class="code">HTTP 201</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: &quot;4500.50&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido creado correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;,
+    &quot;id&quot;: 4,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;4500.50&quot;
+  }
+}</pre></article><article id="operacion-40"><h3>GET /pedidos/4 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido obtenido correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 4,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;4500.50&quot;,
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;
+  }
+}</pre></article><article id="operacion-41"><h3>GET /pedidos?usuario_id=7 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedidos obtenidos correctamente.&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 4,
+      &quot;usuario_id&quot;: 7,
+      &quot;monto&quot;: &quot;4500.50&quot;,
+      &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;
+    }
+  ]
+}</pre></article><article id="operacion-42"><h3>PUT /pedidos/4 <span class="code">HTTP 200</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: 9999
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido actualizado correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 4,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;9999&quot;,
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;
+  }
+}</pre></article><article id="operacion-43"><h3>GET /pedidos/4 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido obtenido correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 4,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;9999.00&quot;,
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;
+  }
+}</pre></article><article id="operacion-44"><h3>DELETE /pedidos/4 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido eliminado correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 4,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;9999.00&quot;,
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.738Z&quot;
+  }
+}</pre></article><article id="operacion-45"><h3>GET /pedidos/4 <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El pedido no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-46"><h3>POST /pedidos <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: -1
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-47"><h3>POST /pedidos <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: 0
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-48"><h3>POST /pedidos <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: &quot;1.234&quot;
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-49"><h3>POST /pedidos <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: null
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;monto debe ser positivo, con hasta dos decimales y un máximo de 99999999.99.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-50"><h3>POST /pedidos <span class="code">HTTP 400</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: [
+    7
+  ],
+  &quot;monto&quot;: 100
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;usuario_id debe ser un entero positivo válido.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-51"><h3>POST /pedidos <span class="code">HTTP 404</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 2147483647,
+  &quot;monto&quot;: 100
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El usuario asociado no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-52"><h3>DELETE /pedidos/2147483647 <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El pedido no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-53"><h3>POST /pedidos <span class="code">HTTP 201</span></h3><h4>Solicitud</h4><pre>{
+  &quot;usuario_id&quot;: 7,
+  &quot;monto&quot;: 100
+}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Pedido creado correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;fecha&quot;: &quot;2026-10-05T04:34:26.785Z&quot;,
+    &quot;id&quot;: 5,
+    &quot;usuario_id&quot;: 7,
+    &quot;monto&quot;: &quot;100.00&quot;
+  }
+}</pre></article><article id="operacion-54"><h3>DELETE /usuarios/7 <span class="code">HTTP 200</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;Usuario y registros asociados eliminados correctamente.&quot;,
+  &quot;data&quot;: {
+    &quot;id&quot;: 7,
+    &quot;nombre&quot;: &quot;Diego Actualizado&quot;,
+    &quot;email&quot;: &quot;diego@prueba.cl&quot;
+  }
+}</pre></article><article id="operacion-55"><h3>GET /usuarios/7 <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;El usuario no existe.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-56"><h3>GET /usuarios <span class="code">HTTP 500</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Error interno del servidor.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-57"><h3>POST /api/auth/login <span class="code">HTTP 404</span></h3><h4>Solicitud</h4><pre>{}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Ruta no encontrada.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-58"><h3>POST /api/auth/registro <span class="code">HTTP 404</span></h3><h4>Solicitud</h4><pre>{}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Ruta no encontrada.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-59"><h3>POST /api/auth/subir-imagen <span class="code">HTTP 404</span></h3><h4>Solicitud</h4><pre>{}</pre><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Ruta no encontrada.&quot;,
+  &quot;data&quot;: null
+}</pre></article><article id="operacion-60"><h3>GET /uploads/prueba.png <span class="code">HTTP 404</span></h3><h4>Respuesta</h4><pre>{
+  &quot;status&quot;: &quot;error&quot;,
+  &quot;message&quot;: &quot;Ruta no encontrada.&quot;,
+  &quot;data&quot;: null
+}</pre></article></main></body></html>

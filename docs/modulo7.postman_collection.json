@@ -1,0 +1,421 @@
+{
+  "info": {
+    "name": "ABP Parte 2 - Módulo 7",
+    "description": "Ejecutar en orden con npm start. Los IDs se guardan automáticamente. El rollback con fallo de la segunda inserción se documenta mediante npm run verify.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "usuario_id",
+      "value": ""
+    },
+    {
+      "key": "pedido_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Estado PostgreSQL",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Listar usuarios (SQL)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Filtrar y paginar",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/usuarios?nombre=Ana&pagina=1&limite=2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Crear usuario y perfil (COMMIT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario Postman\",\n  \"email\": \"postman_{{$timestamp}}@ejemplo.cl\",\n  \"biografia\": \"Perfil creado en una transacción.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"usuario_id\", pm.response.json().data.usuario.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Consultar usuario creado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/usuarios/{{usuario_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Modificar usuario",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/usuarios/{{usuario_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario Postman Actualizado\",\n  \"email\": \"postman_actualizado_{{$timestamp}}@ejemplo.cl\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Confirmar modificación",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/usuarios/{{usuario_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Crear pedido (ORM)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/pedidos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario_id\": \"{{usuario_id}}\",\n  \"monto\": \"4500.50\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"pedido_id\", pm.response.json().data.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Consultar pedido",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/pedidos/{{pedido_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Modificar pedido",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/pedidos/{{pedido_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario_id\": \"{{usuario_id}}\",\n  \"monto\": \"6000.00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Listar usuarios (ORM)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/orm/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Relaciones con include",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/orm/usuarios-pedidos"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 - Eliminar pedido",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/pedidos/{{pedido_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 - Confirmar pedido eliminado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/pedidos/{{pedido_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 - Eliminar usuario y perfil",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/usuarios/{{usuario_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 - Confirmar usuario eliminado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/usuarios/{{usuario_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 - Rechazar ID inválido",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/usuarios/1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código HTTP esperado\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Formato de respuesta\", () => { const data = pm.response.json(); pm.expect(data).to.have.keys(\"status\", \"message\", \"data\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

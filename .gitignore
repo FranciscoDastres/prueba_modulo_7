@@ -10,3 +10,9 @@ node_modules/
 dist/
 build/
 *.log
+
+# Archivos temporales del navegador y paquete generado
+.playwright-cli/
+.playwright/
+output/*.zip
+output/entrega-modulo-7/

@@ -1,0 +1,48 @@
+✅ Conexión exitosa a PostgreSQL (esquema abp7_test_24127_1791174866307)
+▶ ABP Módulo 7: verificación HTTP y PostgreSQL real
+  ✔ L1: conexión y tablas usuarios, perfiles y pedidos (40.46133ms)
+  ✔ L1/L2: tres usuarios simulados y seed repetible (2.924426ms)
+  ✔ L2: GET /usuarios sin credenciales ni datos de autenticación (4.889111ms)
+  ✔ L2 PLUS: filtro por nombre y paginación (10.895877ms)
+  ✔ L2: búsquedas parametrizadas ante caracteres SQL (2.158988ms)
+✅ COMMIT: usuario y perfil creados correctamente.
+  ✔ L4: POST /usuarios confirma usuario y perfil juntos (15.268094ms)
+  ✔ L2: consulta de usuario por ID (3.442988ms)
+  ✔ L3: PUT actualiza y persiste nombre/email (8.206473ms)
+✅ Conexión exitosa a PostgreSQL (esquema abp7_test_24127_1791174866307)
+❌ ROLLBACK: creación de usuario y perfil cancelada (23505).
+  ✔ L3: email duplicado devuelve 409 y conserva los datos (13.49865ms)
+  ✔ L3: rechaza ID inválido abc (3.648039ms)
+  ✔ L3: rechaza ID inválido 1.5 (4.323311ms)
+  ✔ L3: rechaza ID inválido 0 (4.364284ms)
+  ✔ L3: rechaza ID inválido -1 (3.148442ms)
+  ✔ L3: rechaza ID inválido 2147483648 (4.725532ms)
+  ✔ L3: IDs inexistentes devuelven 404 (6.780237ms)
+  ✔ Validaciones: campos ausentes (1.348977ms)
+  ✔ Validaciones: nombre vacío (2.56693ms)
+  ✔ Validaciones: email inválido (1.175627ms)
+  ✔ Validaciones: biografía inválida (2.351289ms)
+  ✔ Validaciones: JSON mal formado y paginación inválida (11.048302ms)
+❌ ROLLBACK: creación de usuario y perfil cancelada (P0001).
+❌ POST /usuarios: Fallo controlado para demostrar rollback
+  ✔ L4: error en la segunda inserción revierte también el usuario (12.001605ms)
+  ✔ L5: SQL manual y ORM producen resultados idénticos (8.441241ms)
+  ✔ L6: include devuelve pedidos 1:N y perfil 1:1 (7.456884ms)
+  ✔ L6: clave foránea de pedidos referencia usuarios e incluye índice (2.495751ms)
+  ✔ CRUD pedidos: crear y consultar (15.130655ms)
+  ✔ CRUD pedidos: actualizar y eliminar (15.117902ms)
+  ✔ Pedidos: monto y usuario asociado válidos (17.504091ms)
+  ✔ L3: DELETE elimina usuario y relaciones en cascada (11.916889ms)
+❌ GET /usuarios: relation "usuarios" does not exist
+✅ Conexión exitosa a PostgreSQL (esquema abp7_test_24127_1791174866307)
+  ✔ L2: errores reales de consulta devuelven 500 controlado (11.100244ms)
+  ✔ Módulo 8 excluido: login, registro, subida y uploads devuelven 404 (7.050667ms)
+✔ ABP Módulo 7: verificación HTTP y PostgreSQL real (347.169544ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 559.722948
