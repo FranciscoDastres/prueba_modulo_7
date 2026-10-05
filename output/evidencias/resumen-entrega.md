@@ -15,4 +15,4 @@ Fecha: 2026-10-05T04:34:26.470Z
 - [x] Tablas originales conservadas y esquemas temporales de pruebas eliminados.
 - [x] Código del módulo 8 retirado.
 
-La publicación en GitHub y la carga en Google Drive figuran pendientes en docs/entrega-modulo-7.md.
+El repositorio está actualizado en GitHub, rama main. La carga en Google Drive sigue pendiente en docs/entrega-modulo-7.md.

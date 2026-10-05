@@ -30,12 +30,12 @@ Pauta de referencia: Proyecto Módulo 7 - ABP, páginas impresas 11 a 15. La car
 
 ## Publicación de la entrega
 
-- [ ] Publicar los cambios en el repositorio GitHub `FranciscoDastres/prueba_modulo_7` y comprobar que el enlace entregado muestra esta versión.
+- [x] Cambios publicados en el repositorio GitHub `FranciscoDastres/prueba_modulo_7`, rama `main`.
 - [ ] Crear o actualizar la subcarpeta **Parte 2 – Módulo 7** en el Google Drive de entrega.
 - [ ] Subir allí `output/playwright/`, `output/evidencias/` y el enlace de GitHub. El ZIP puede adjuntarse como copia del código.
 - [ ] Verificar que el evaluador tenga acceso al repositorio y a la carpeta Drive.
 
-Estos últimos checks corresponden a la entrega externa. El informe técnico y los archivos se preparan localmente; no equivalen a una publicación en GitHub o Google Drive.
+El repositorio está actualizado en GitHub. La carga de las evidencias en Google Drive y la comprobación del acceso del evaluador siguen pendientes.
 
 ## Cómo revisar las evidencias
 
