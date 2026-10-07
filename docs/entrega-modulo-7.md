@@ -44,3 +44,4 @@ Abre `output/evidencias/verificacion.html` en un navegador. El informe identific
 Para repetirlo, configura tu PostgreSQL en `.env`, ejecuta `npm run db:init` y `npm run verify`. Las evidencias JSON, HTML y TXT se regeneran. Las capturas incluidas documentan la ejecución verificada para esta entrega.
 
 Los casos que devuelven 400, 404, 409, 413 o 500 comprueban situaciones inválidas deliberadas. Una prueba aprobada significa que el código respondió como correspondía y conservó la integridad de los datos.
+/
